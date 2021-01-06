@@ -1,0 +1,38 @@
+{
+    "name": "wapplr-mongo",
+    "description": "MongoDB and Mongoose extension for Wapplr",
+    "license": "MIT",
+    "dependencies": {
+        "connect-mongo": "^3.2.0",
+        "mongoose": "^5.9.6",
+        "mongoose-schema-jsonschema": "^1.4.4",
+        "wapplr": "^1.0.0"
+    },
+    "devDependencies": {
+        "wapplr-cli": "^1.0.0"
+    },
+    "engines": {
+        "node": ">=12.0.0"
+    },
+    "browserslist": [
+        ">1%",
+        "last 4 versions",
+        "Firefox ESR",
+        "not ie < 9"
+    ],
+    "scripts": {
+        "wapplr-mongo start": "wapplr-cli start",
+        "wapplr-mongo build": "wapplr-cli build",
+        "wapplr-mongo clean": "wapplr-cli clean"
+    },
+    "version": "1.0.0",
+    "files": [
+        "dist/*"
+    ],
+    "main": "dist/server",
+    "browser": "dist/client",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wapplr/wapplr-mongo.git"
+    }
+}
