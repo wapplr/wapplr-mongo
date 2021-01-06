@@ -18,7 +18,7 @@ const wapp = wapplrServer({config: {
         }
     }
 });
-wapplrMongo({wapp});
+await wapplrMongo({wapp});
 wapp.server.listen();
 ```
 
