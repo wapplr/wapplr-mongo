@@ -1,7 +1,7 @@
 import wapplrClient from "wapplr";
 
 export default function createClient(p) {
-    console.log("[wapplr-pwa] There is not client side module in this package")
+    console.log("[wapplr-mongo] There is not client side module in this package")
     return p.wapp || wapplrClient({...p});
 }
 
@@ -10,7 +10,7 @@ export function createMiddleware(p = {}) {
     return function mongoMiddleware(req, res, next) {
         // eslint-disable-next-line no-unused-vars
         const wapp = req.wapp || p.wapp || createClient(p);
-        console.log("[wapplr-pwa] There is not client side module in this package")
+        console.log("[wapplr-mongo] There is not client side module in this package")
         next();
     }
 }
