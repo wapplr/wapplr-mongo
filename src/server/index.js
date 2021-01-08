@@ -1,16 +1,16 @@
 import wapplrServer from 'wapplr';
 import initDatabase from "./initDatabase";
 
-export default async function createServer(p = {}) {
+export default function createServer(p = {}) {
     const wapp = p.wapp || wapplrServer({...p});
-    await initDatabase({wapp, ...p});
+    initDatabase({wapp, ...p});
     return wapp;
 }
 
 export function createMiddleware(p = {}) {
-    return async function mongoMiddleware(req, res, next) {
-        const wapp = req.wapp || p.wapp || await createServer(p);
-        await initDatabase({wapp, ...p});
+    return function mongoMiddleware(req, res, next) {
+        const wapp = req.wapp || p.wapp || createServer(p);
+        initDatabase({wapp, ...p});
         next();
     }
 }

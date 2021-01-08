@@ -8,7 +8,7 @@ import wapplrMongo from "wapplr-mongo";
 import wapplrServer from "wapplr";
 const wapp = wapplrServer({config: {
         server: {
-            databaseConfig: {
+            database: {
                 mongoConnectionString: "mongodb://localhost/wapplr",
             }
         },
@@ -18,7 +18,17 @@ const wapp = wapplrServer({config: {
         }
     }
 });
-await wapplrMongo({wapp});
+
+wapplrMongo({wapp});
+const db = await wapp.server.database.addDatabase({
+    //usage without global config
+    /*
+    config: {
+        mongoConnectionString: "mongodb://localhost/wapplr",
+    } 
+    */
+});
+
 wapp.server.listen();
 ```
 

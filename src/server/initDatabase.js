@@ -4,16 +4,9 @@ import {mergeProperties, defaultDescriptor} from "./utils";
 
 addJsonSchemaToMongoose(mongoose);
 
-export default async function initDatabase(p = {}) {
+export default function initDatabase(p = {}) {
     const {wapp} = p;
     const server = wapp.server;
-
-    const globalDatabaseConfig = (server.settings && server.settings.databaseConfig) ? server.settings.databaseConfig : {};
-    const config = (p.config) ? {...globalDatabaseConfig, ...p.config} : {...globalDatabaseConfig};
-
-    const {
-        mongoConnectionString = "mongodb://localhost/wapplr",
-    } = config;
 
     if (!server.database) {
 
@@ -22,7 +15,15 @@ export default async function initDatabase(p = {}) {
                 ...defaultDescriptor,
                 writable: false,
                 enumerable: false,
-                value: async function addDatabase({mongoConnectionString, connection}) {
+                value: async function addDatabase(p = {}) {
+
+                    const server = wapp.server;
+                    const globalDatabaseConfig = (server.settings && server.settings.database) ? server.settings.database : {};
+
+                    const {
+                        mongoConnectionString = globalDatabaseConfig.mongoConnectionString || "mongodb://localhost/wapplr",
+                        connection
+                    } = p;
 
                     function defaultAddModel(p = {}) {
 
@@ -130,11 +131,22 @@ export default async function initDatabase(p = {}) {
                 ...defaultDescriptor,
                 writable: false,
                 enumerable: false,
-                value: async function getDatabase({mongoConnectionString, addIfThereIsNot, connection}) {
+                value: async function getDatabase(p = {}) {
+
+                    const server = wapp.server;
+                    const globalDatabaseConfig = (server.settings && server.settings.database) ? server.settings.database : {};
+
+                    const {
+                        mongoConnectionString = globalDatabaseConfig.mongoConnectionString || "mongodb://localhost/wapplr",
+                        addIfThereIsNot,
+                        connection
+                    } = p;
+
                     const db = server.database[mongoConnectionString];
                     if (db || !addIfThereIsNot){
                         return db;
                     }
+
                     return await server.database.addDatabase({mongoConnectionString, connection});
                 }
             },
@@ -189,7 +201,5 @@ export default async function initDatabase(p = {}) {
         }
 
     }
-
-    return await server.database.getDatabase({mongoConnectionString, addIfThereIsNot: true});
 
 }
