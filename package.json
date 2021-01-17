@@ -3,10 +3,10 @@
     "description": "MongoDB and Mongoose extension for Wapplr",
     "license": "MIT",
     "dependencies": {
+        "wapplr": "^1.0.0",
         "connect-mongo": "^3.2.0",
         "mongoose": "^5.9.6",
-        "mongoose-schema-jsonschema": "^1.4.4",
-        "wapplr": "^1.0.0"
+        "mongoose-schema-jsonschema": "^1.4.4"
     },
     "devDependencies": {
         "wapplr-cli": "^1.0.0"
@@ -25,7 +25,7 @@
         "wapplr-mongo build": "wapplr-cli build",
         "wapplr-mongo clean": "wapplr-cli clean"
     },
-    "version": "1.0.6",
+    "version": "1.0.7",
     "files": [
         "dist/*"
     ],

@@ -3,8 +3,7 @@ import initDatabase from "./initDatabase";
 
 export default function createServer(p = {}) {
     const wapp = p.wapp || wapplrServer({...p});
-    initDatabase({wapp, ...p});
-    return wapp;
+    return initDatabase({wapp, ...p});
 }
 
 export function createMiddleware(p = {}) {

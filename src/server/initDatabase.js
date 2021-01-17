@@ -10,7 +10,7 @@ export default function initDatabase(p = {}) {
 
     if (!server.database) {
 
-        const defaultDatabasesObejct = Object.create(Object.prototype, {
+        const defaultDatabasesObject = Object.create(Object.prototype, {
             addDatabase: {
                 ...defaultDescriptor,
                 writable: false,
@@ -46,21 +46,25 @@ export default function initDatabase(p = {}) {
                                         return null;
                                     }
                                     const jsonSchema = database.models[modelName].jsonSchema();
-                                    jsonSchema.properties.id = jsonSchema.properties._id;
-                                    delete jsonSchema.properties._id;
                                     delete jsonSchema.properties.__v;
 
-                                    function recursiveCheck(tree, schema) {
+                                    function recursiveCheck(modelSchema, schema) {
 
-                                        Object.keys(tree).forEach(function (key) {
-                                            const property = tree[key]
-                                            const type = property.type;
-                                            if (typeof type === "object"){
-                                                recursiveCheck(property, schema[key].properties);
+                                        Object.keys(modelSchema).forEach(function (key) {
+
+                                            const modelProperties = modelSchema[key];
+
+                                            const options = modelProperties.wapplr || {};
+                                            const {disabled} = options;
+
+                                            if (schema[key] && modelProperties.wapplr) {
+                                                schema[key].wapplr = options;
+                                            }
+
+                                            if (schema[key] && schema[key].properties){
+                                                recursiveCheck(modelProperties, schema[key].properties);
                                             } else {
-                                                const options = property.wapplr || {};
-                                                const {hidden} = options;
-                                                if (hidden){
+                                                if (disabled){
                                                     delete schema[key];
                                                 }
                                             }
@@ -155,15 +159,14 @@ export default function initDatabase(p = {}) {
         Object.defineProperty(server, "database", {
             ...defaultDescriptor,
             writable: false,
-            value: defaultDatabasesObejct
+            value: defaultDatabasesObject
         });
 
         if (wapp.states) {
             wapp.states.addHandle({
-                schema: function defaultStatesForSchmema(req, res, next) {
+                statesFromDatabase: function statesFromDatabase(req, res, next) {
 
                     const schema = {};
-                    const requests = {};
 
                     Object.keys(server.database).forEach(function (mongoConnectionString, i) {
                         const models = server.database[mongoConnectionString].models;
@@ -171,27 +174,11 @@ export default function initDatabase(p = {}) {
                             schema[i] = {};
                             Object.keys(models).forEach(function (modelName) {
                                 schema[i][modelName] = models[modelName].getJsonSchema()
-                                if (models[modelName].resolvers) {
-                                    Object.keys(models[modelName].resolvers).forEach(function(key){
-                                        requests[key] = {
-                                            schema: schema[i][modelName]
-                                        };
-                                        Object.keys(models[modelName].resolvers[key]).forEach(function (resPropKey){
-                                            if (typeof models[modelName].resolvers[key][resPropKey] !== "function"){
-                                                try{
-                                                    JSON.stringify(models[modelName].resolvers[key][resPropKey])
-                                                    requests[key][resPropKey] = models[modelName].resolvers[key][resPropKey];
-                                                } catch (e){}
-                                            }
-                                        })
-                                    })
-                                }
                             })
                         }
                     })
 
                     wapp.response.store.dispatch(wapp.states.runAction("res", {name: "schema", value: schema}))
-                    wapp.response.store.dispatch(wapp.states.runAction("res", {name: "requests", value: requests}))
                     wapp.response.state = wapp.response.store.getState();
 
                     next();
@@ -201,5 +188,7 @@ export default function initDatabase(p = {}) {
         }
 
     }
+
+    return server.database;
 
 }
