@@ -41,7 +41,9 @@ export default function initDatabase(p = {}) {
                             getJsonSchema: {
                                 ...defaultDescriptor,
                                 enumerable: false,
-                                value: function jsonSchmema() {
+                                value: function jsonSchmema(p = {}) {
+                                    const {doNotDeleteDisabledFields = false} = p;
+
                                     if (!database.models[modelName].jsonSchema) {
                                         return null;
                                     }
@@ -64,7 +66,7 @@ export default function initDatabase(p = {}) {
                                             if (schema[key] && schema[key].properties){
                                                 recursiveCheck(modelProperties, schema[key].properties);
                                             } else {
-                                                if (disabled){
+                                                if (disabled && !doNotDeleteDisabledFields){
                                                     delete schema[key];
                                                 }
                                             }
@@ -166,20 +168,46 @@ export default function initDatabase(p = {}) {
             wapp.states.addHandle({
                 statesFromDatabase: function statesFromDatabase(req, res, next) {
 
-                    const schema = {};
+                    if (!wapp.response.store.getState().res.schema) {
 
-                    Object.keys(server.database).forEach(function (mongoConnectionString, i) {
-                        const models = server.database[mongoConnectionString].models;
-                        if (models && typeof models == "object" && Object.keys(models).length) {
-                            schema[i] = {};
-                            Object.keys(models).forEach(function (modelName) {
-                                schema[i][modelName] = models[modelName].getJsonSchema()
-                            })
-                        }
-                    })
+                        const schema = {};
 
-                    wapp.response.store.dispatch(wapp.states.runAction("res", {name: "schema", value: schema}))
-                    wapp.response.state = wapp.response.store.getState();
+                        Object.keys(server.database).forEach(function (mongoConnectionString, i) {
+                            const models = server.database[mongoConnectionString].models;
+                            if (models && typeof models == "object" && Object.keys(models).length) {
+                                schema[i] = {};
+                                Object.keys(models).forEach(function (modelName) {
+
+                                    schema[i][modelName] = models[modelName].getJsonSchema();
+
+                                    function recursiveCheck(modelSchema) {
+                                        Object.keys(modelSchema).forEach(function (key) {
+                                            const modelProperties = modelSchema[key];
+                                            if (modelProperties && modelProperties.wapplr && modelProperties.wapplr.pattern && modelProperties.wapplr.pattern.source) {
+                                                modelProperties.wapplr.pattern = modelProperties.wapplr.pattern.source;
+                                            }
+                                            if (modelProperties && modelProperties.properties){
+                                                recursiveCheck(modelProperties);
+                                            }
+                                        })
+                                    }
+
+                                    recursiveCheck(schema[i][modelName].properties);
+
+                                    try {
+                                        eval(`function test() {var a = ${JSON.stringify(schema[i][modelName])};}; test()`)
+                                    } catch (e) {
+                                        //delete schema[i][modelName];
+                                        console.log("Can't parse "+modelName+" schema object, error:", e)
+                                    }
+                                })
+                            }
+                        })
+
+                        wapp.response.store.dispatch(wapp.states.runAction("res", {name: "schema", value: schema}))
+                        wapp.response.state = wapp.response.store.getState();
+
+                    }
 
                     next();
 
