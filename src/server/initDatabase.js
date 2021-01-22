@@ -18,7 +18,7 @@ export default function initDatabase(p = {}) {
                 value: async function addDatabase(p = {}) {
 
                     const server = wapp.server;
-                    const globalDatabaseConfig = (server.settings && server.settings.database) ? server.settings.database : {};
+                    const globalDatabaseConfig = (server.config && server.config.database) ? server.config.database : {};
 
                     const {
                         mongoConnectionString = globalDatabaseConfig.mongoConnectionString || "mongodb://localhost/wapplr",
@@ -140,7 +140,7 @@ export default function initDatabase(p = {}) {
                 value: async function getDatabase(p = {}) {
 
                     const server = wapp.server;
-                    const globalDatabaseConfig = (server.settings && server.settings.database) ? server.settings.database : {};
+                    const globalDatabaseConfig = (server.config && server.config.database) ? server.config.database : {};
 
                     const {
                         mongoConnectionString = globalDatabaseConfig.mongoConnectionString || "mongodb://localhost/wapplr",
@@ -164,11 +164,13 @@ export default function initDatabase(p = {}) {
             value: defaultDatabasesObject
         });
 
+        Object.defineProperty(server.database, "wapp", {...defaultDescriptor, writable: false, enumerable: false, value: wapp});
+
         if (wapp.states) {
             wapp.states.addHandle({
                 statesFromDatabase: function statesFromDatabase(req, res, next) {
 
-                    if (!wapp.response.store.getState().res.schema) {
+                    if (!wapp.states.store.getState().res.schema) {
 
                         const schema = {};
 
@@ -204,8 +206,8 @@ export default function initDatabase(p = {}) {
                             }
                         })
 
-                        wapp.response.store.dispatch(wapp.states.runAction("res", {name: "schema", value: schema}))
-                        wapp.response.state = wapp.response.store.getState();
+                        wapp.states.store.dispatch(wapp.states.runAction("res", {name: "schema", value: schema}))
+                        wapp.response.state = wapp.states.store.getState();
 
                     }
 
