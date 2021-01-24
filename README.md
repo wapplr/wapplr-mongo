@@ -20,13 +20,11 @@ const wapp = wapplrServer({config: {
 });
 
 wapplrMongo({wapp});
+
 const db = await wapp.server.database.addDatabase({
-    //usage without global config
-    /*
-    config: {
+    /*config: {
         mongoConnectionString: "mongodb://localhost/wapplr",
-    } 
-    */
+    } */
 });
 
 wapp.server.listen();
