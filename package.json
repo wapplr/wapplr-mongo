@@ -25,7 +25,7 @@
         "wapplr-mongo build": "wapplr-cli build",
         "wapplr-mongo clean": "wapplr-cli clean"
     },
-    "version": "1.0.12",
+    "version": "1.0.13",
     "files": [
         "dist/*"
     ],
