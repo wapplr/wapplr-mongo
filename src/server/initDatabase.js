@@ -170,7 +170,7 @@ export default function initDatabase(p = {}) {
             wapp.states.addHandle({
                 statesFromDatabase: function statesFromDatabase(req, res, next) {
 
-                    if (!res.wappResponse.store.getState().res.schema) {
+                    if (wapp.globals.DEV && !res.wappResponse.store.getState().res._schema) {
 
                         const schema = {};
 
@@ -206,7 +206,7 @@ export default function initDatabase(p = {}) {
                             }
                         })
 
-                        res.wappResponse.store.dispatch(wapp.states.runAction("res", {name: "schema", value: schema}))
+                        res.wappResponse.store.dispatch(wapp.states.runAction("res", {name: "_schema", value: schema}))
                         res.wappResponse.state = res.wappResponse.store.getState();
 
                     }
