@@ -181,20 +181,25 @@ export default function initDatabase(p = {}) {
                                 Object.keys(models).forEach(function (modelName) {
 
                                     schema[i][modelName] = models[modelName].getJsonSchema();
+                                    try{
+                                        schema[i][modelName] = JSON.parse(JSON.stringify(schema[i][modelName]))
+                                    }catch (e){}
 
-                                    function recursiveCheck(modelSchema) {
-                                        Object.keys(modelSchema).forEach(function (key) {
-                                            const modelProperties = modelSchema[key];
-                                            if (modelProperties && modelProperties.wapplr && modelProperties.wapplr.pattern && modelProperties.wapplr.pattern.source) {
-                                                modelProperties.wapplr.pattern = modelProperties.wapplr.pattern.source;
-                                            }
-                                            if (modelProperties && modelProperties.properties){
-                                                recursiveCheck(modelProperties);
-                                            }
-                                        })
-                                    }
+                                    try {
+                                        function recursiveCheck(modelSchema) {
+                                            Object.keys(modelSchema).forEach(function (key) {
+                                                const modelProperties = modelSchema[key];
+                                                if (modelProperties && modelProperties.wapplr && modelProperties.wapplr.pattern && modelProperties.wapplr.pattern.source) {
+                                                    modelProperties.wapplr.pattern = modelProperties.wapplr.pattern.source;
+                                                }
+                                                if (modelProperties && modelProperties.properties) {
+                                                    recursiveCheck(modelProperties);
+                                                }
+                                            })
+                                        }
 
-                                    recursiveCheck(schema[i][modelName].properties);
+                                        recursiveCheck(schema[i][modelName].properties);
+                                    } catch (e){}
 
                                     try {
                                         eval(`function test() {var a = ${JSON.stringify(schema[i][modelName])};}; test()`)
