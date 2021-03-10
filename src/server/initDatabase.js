@@ -83,9 +83,9 @@ export default function initDatabase(p = {}) {
                                 ...defaultDescriptor,
                                 value: resolvers
                             }
-                        }
+                        };
 
-                        const defaultModelObject = Object.create(Object.prototype, properties)
+                        const defaultModelObject = Object.create(Object.prototype, properties);
                         mergeProperties(Model, defaultModelObject);
 
                         database.models[modelName] = Model;
@@ -121,7 +121,7 @@ export default function initDatabase(p = {}) {
                                 useUnifiedTopology: true
                             })
                         }
-                    })
+                    });
 
                     Object.defineProperty(server.database, mongoConnectionString, {
                         ...defaultDescriptor,
@@ -156,7 +156,7 @@ export default function initDatabase(p = {}) {
                     return await server.database.addDatabase({mongoConnectionString, connection});
                 }
             },
-        })
+        });
 
         Object.defineProperty(server, "database", {
             ...defaultDescriptor,
@@ -202,16 +202,20 @@ export default function initDatabase(p = {}) {
                                     } catch (e){}
 
                                     try {
-                                        eval(`function test() {var a = ${JSON.stringify(schema[i][modelName])};}; test()`)
+                                        eval(`function test() {
+                                            var a = ${JSON.stringify(schema[i][modelName])};
+                                        }
+
+                                        test()`)
                                     } catch (e) {
                                         //delete schema[i][modelName];
                                         console.log("Can't parse "+modelName+" schema object, error:", e)
                                     }
                                 })
                             }
-                        })
+                        });
 
-                        res.wappResponse.store.dispatch(wapp.states.runAction("res", {name: "_schema", value: schema}))
+                        res.wappResponse.store.dispatch(wapp.states.runAction("res", {name: "_schema", value: schema}));
                         res.wappResponse.state = res.wappResponse.store.getState();
 
                     }
