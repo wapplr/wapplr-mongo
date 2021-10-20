@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import addJsonSchemaToMongoose from 'mongoose-schema-jsonschema';
+import addJsonSchemaToMongoose from "mongoose-schema-jsonschema";
 import {mergeProperties, defaultDescriptor} from "./utils";
+import {copyObject} from "wapplr/dist/common/utils";
 
 addJsonSchemaToMongoose(mongoose);
 
@@ -170,7 +171,7 @@ export default function initDatabase(p = {}) {
             wapp.states.addHandle({
                 statesFromDatabase: function statesFromDatabase(req, res, next) {
 
-                    if (wapp.globals.DEV && !res.wappResponse.store.getState().res._schema) {
+                    if (wapp.globals.DEV && !res.wappResponse.store.getState("res._schema")) {
 
                         const schema = {};
 
@@ -182,7 +183,7 @@ export default function initDatabase(p = {}) {
 
                                     schema[i][modelName] = models[modelName].getJsonSchema();
                                     try{
-                                        schema[i][modelName] = JSON.parse(JSON.stringify(schema[i][modelName]))
+                                        schema[i][modelName] = copyObject(schema[i][modelName])
                                     }catch (e){}
 
                                     try {
@@ -202,7 +203,9 @@ export default function initDatabase(p = {}) {
                                     } catch (e){}
 
                                     try {
+                                        // eslint-disable-next-line
                                         eval(`function test() {
+                                            // noinspection JSUnusedLocalSymbols
                                             var a = ${JSON.stringify(schema[i][modelName])};
                                         }
 
@@ -216,7 +219,6 @@ export default function initDatabase(p = {}) {
                         });
 
                         res.wappResponse.store.dispatch(wapp.states.runAction("res", {name: "_schema", value: schema}));
-                        res.wappResponse.state = res.wappResponse.store.getState();
 
                     }
 
