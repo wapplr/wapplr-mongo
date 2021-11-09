@@ -58,10 +58,18 @@ export default function initDatabase(p = {}) {
                                             const modelProperties = modelSchema[key];
 
                                             const options = modelProperties.wapplr || {};
-                                            const {disabled} = options;
+                                            const {disabled, required = (modelProperties.required === true)} = options;
 
-                                            if (schema[key] && modelProperties.wapplr) {
-                                                schema[key].wapplr = options;
+                                            if (schema[key]) {
+
+                                                if (modelProperties.wapplr) {
+                                                    schema[key].wapplr = {...options};
+                                                }
+
+                                                if (schema[key].wapplr && required && typeof schema[key].wapplr.required == "undefined") {
+                                                    schema[key].wapplr.required = required;
+                                                }
+
                                             }
 
                                             if (schema[key] && schema[key].properties){
