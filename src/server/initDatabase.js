@@ -58,7 +58,7 @@ export default function initDatabase(p = {}) {
                                             const modelProperties = modelSchema[key];
 
                                             const options = modelProperties.wapplr || {};
-                                            const {disabled, required = (modelProperties.required === true)} = options;
+                                            const {disabled, required = (modelProperties.required === true), unique = (modelProperties.unique === true)} = options;
 
                                             if (schema[key]) {
 
@@ -66,8 +66,26 @@ export default function initDatabase(p = {}) {
                                                     schema[key].wapplr = {...options};
                                                 }
 
-                                                if (schema[key].wapplr && required && typeof schema[key].wapplr.required == "undefined") {
+                                                if ((schema[key].wapplr && required && typeof schema[key].wapplr.required == "undefined") || !schema[key].wapplr) {
+                                                    if (!schema[key].wapplr){
+                                                        schema[key].wapplr = {}
+                                                    }
                                                     schema[key].wapplr.required = required;
+                                                }
+
+                                                if (schema[key].wapplr?.required === true && typeof schema[key].required == "undefined"){
+                                                    schema[key].required = true;
+                                                }
+
+                                                if ((schema[key].wapplr && unique && typeof schema[key].wapplr.unique == "undefined") || !schema[key].wapplr) {
+                                                    if (!schema[key].wapplr){
+                                                        schema[key].wapplr = {}
+                                                    }
+                                                    schema[key].wapplr.unique = unique;
+                                                }
+
+                                                if (schema[key].wapplr?.unique === true && typeof schema[key].unique == "undefined"){
+                                                    schema[key].unique = true;
                                                 }
 
                                             }
