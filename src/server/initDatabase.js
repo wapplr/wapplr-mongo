@@ -39,6 +39,12 @@ export default function initDatabase(p = {}) {
                                 enumerable: false,
                                 value: modelName
                             },
+                            database: {
+                                ...defaultDescriptor,
+                                writable: false,
+                                enumerable: false,
+                                value: database
+                            },
                             getJsonSchema: {
                                 ...defaultDescriptor,
                                 enumerable: false,
@@ -58,34 +64,60 @@ export default function initDatabase(p = {}) {
                                             const modelProperties = modelSchema[key];
 
                                             const options = modelProperties.wapplr || {};
-                                            const {disabled, required = (modelProperties.required === true), unique = (modelProperties.unique === true)} = options;
+
+                                            const {
+                                                disabled,
+                                            } = options;
 
                                             if (schema[key]) {
+
+                                                if (!schema[key].type && modelProperties.instance){
+                                                    schema[key].type = modelProperties.instance.toLowerCase();
+                                                }
 
                                                 if (modelProperties.wapplr) {
                                                     schema[key].wapplr = {...options};
                                                 }
 
-                                                if ((schema[key].wapplr && required && typeof schema[key].wapplr.required == "undefined") || !schema[key].wapplr) {
-                                                    if (!schema[key].wapplr){
-                                                        schema[key].wapplr = {}
+                                                ["default", "required", "unique", "pattern", "ref"].forEach((saveKey)=>{
+                                                    let value =
+                                                        (typeof options[saveKey] !== "undefined") ?
+                                                            options[saveKey] :
+                                                            (typeof modelProperties[saveKey] !== "undefined") ?
+                                                                modelProperties[saveKey] : schema[key][saveKey];
+
+                                                    if (value && value.toJSON) {
+                                                        value = value.toJSON();
                                                     }
-                                                    schema[key].wapplr.required = required;
-                                                }
-
-                                                if (schema[key].wapplr?.required === true && typeof schema[key].required == "undefined"){
-                                                    schema[key].required = true;
-                                                }
-
-                                                if ((schema[key].wapplr && unique && typeof schema[key].wapplr.unique == "undefined") || !schema[key].wapplr) {
-                                                    if (!schema[key].wapplr){
-                                                        schema[key].wapplr = {}
+                                                    if (value && typeof value == "object" && value.constructor.name === "RegExp"){
+                                                        value = value.toString();
                                                     }
-                                                    schema[key].wapplr.unique = unique;
+
+                                                    if (typeof value !== "undefined") {
+
+                                                        if ((schema[key].wapplr && typeof schema[key].wapplr[saveKey] == "undefined") || (!schema[key].wapplr)) {
+                                                            if (!schema[key].wapplr) {
+                                                                schema[key].wapplr = {}
+                                                            }
+                                                            schema[key].wapplr[saveKey] = value;
+                                                            if (saveKey === "required"){
+                                                                schema[key].wapplr[saveKey] = !!(value);
+                                                            }
+                                                        }
+
+                                                        if (schema[key].wapplr && schema[key].wapplr[saveKey] && typeof schema[key][saveKey] == "undefined") {
+                                                            schema[key][saveKey] = value;
+                                                        }
+                                                    }
+
+                                                });
+
+                                                if (typeof schema[key].pattern !== "undefined") {
+                                                    delete schema[key].pattern;
                                                 }
 
-                                                if (schema[key].wapplr?.unique === true && typeof schema[key].unique == "undefined"){
-                                                    schema[key].unique = true;
+                                                if (typeof schema[key]["x-ref"] !== "undefined") {
+                                                    delete schema[key]["x-ref"]
                                                 }
 
                                             }
