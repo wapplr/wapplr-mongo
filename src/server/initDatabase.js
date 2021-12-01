@@ -79,7 +79,7 @@ export default function initDatabase(p = {}) {
                                                     schema[key].wapplr = {...options};
                                                 }
 
-                                                ["default", "required", "unique", "pattern", "ref"].forEach((saveKey)=>{
+                                                ["default", "required", "unique", "pattern", "ref", "validate"].forEach((saveKey)=>{
                                                     let value =
                                                         (typeof options[saveKey] !== "undefined") ?
                                                             options[saveKey] :
@@ -89,8 +89,8 @@ export default function initDatabase(p = {}) {
                                                     if (value && value.toJSON) {
                                                         value = value.toJSON();
                                                     }
-                                                    if (value && typeof value == "object" && value.constructor.name === "RegExp"){
-                                                        value = value.toString();
+                                                    if (saveKey === "pattern" && value && typeof value == "object" && value.source){
+                                                        value = value.source;
                                                     }
 
                                                     if (typeof value !== "undefined") {
@@ -107,6 +107,9 @@ export default function initDatabase(p = {}) {
 
                                                         if (schema[key].wapplr && schema[key].wapplr[saveKey] && typeof schema[key][saveKey] == "undefined") {
                                                             schema[key][saveKey] = value;
+                                                            if (saveKey === "validate" && typeof value === "function" && schema[key].wapplr.validationMessage){
+                                                                schema[key][saveKey] = [value, schema[key].wapplr.validationMessage]
+                                                            }
                                                         }
                                                     }
 
