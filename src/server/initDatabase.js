@@ -126,7 +126,7 @@ export default function initDatabase(p = {}) {
                                             }
 
                                             if (schema[key] && schema[key].properties){
-                                                recursiveCheck(modelProperties, schema[key].properties);
+                                                recursiveCheck(modelProperties.type?.tree || modelProperties, schema[key].properties);
                                             } else {
                                                 if (disabled && !doNotDeleteDisabledFields){
                                                     delete schema[key];
