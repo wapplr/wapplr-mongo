@@ -5,7 +5,7 @@
     "dependencies": {
         "wapplr": "^1.0.0",
         "connect-mongo": "^3.2.0",
-        "mongoose": "^8.3.5",
+        "mongoose": "^8.9.3",
         "mongoose-schema-jsonschema": "^2.2.0"
     },
     "devDependencies": {
